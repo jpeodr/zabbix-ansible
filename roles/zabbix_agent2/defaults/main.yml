@@ -1,0 +1,37 @@
+---
+# =====================================================================
+# VARIAVEIS PADRAO DO ROLE
+# =====================================================================
+# Normalmente voce NAO precisa editar este arquivo.
+# Edite group_vars/all.yml.
+
+zabbix_agent2_branch: "7.0"
+
+zabbix_agent2_server: ""
+zabbix_agent2_serveractive: "{{ zabbix_agent2_server }}"
+zabbix_agent2_hostname: "{{ inventory_hostname }}"
+zabbix_agent2_listenport: 10050
+zabbix_agent2_hostmetadata: ""
+
+zabbix_agent2_manage_firewall: false
+
+zabbix_agent2_service_name: zabbix-agent2
+zabbix_agent2_config_file: /etc/zabbix/zabbix_agent2.conf
+zabbix_agent2_package_state: present
+zabbix_agent2_extra_packages: []
+
+# URLs dos repositorios oficiais
+zabbix_agent2_repo_base: "https://repo.zabbix.com/zabbix/{{ zabbix_agent2_branch }}"
+zabbix_agent2_release_name: "zabbix-release_latest_{{ zabbix_agent2_branch }}"
+zabbix_agent2_debian_repo_path: "debian/pool/main/z/zabbix-release"
+zabbix_agent2_ubuntu_repo_path: "ubuntu/pool/main/z/zabbix-release"
+zabbix_agent2_debian_suffix: "debian{{ ansible_distribution_major_version }}_all.deb"
+zabbix_agent2_ubuntu_suffix: "ubuntu{{ ansible_distribution_version }}_all.deb"
+zabbix_agent2_debian_repo_url: >-
+  {{ zabbix_agent2_repo_base }}/{{ zabbix_agent2_debian_repo_path }}/{{ zabbix_agent2_release_name }}+{{ zabbix_agent2_debian_suffix }}
+zabbix_agent2_ubuntu_repo_url: >-
+  {{ zabbix_agent2_repo_base }}/{{ zabbix_agent2_ubuntu_repo_path }}/{{ zabbix_agent2_release_name }}+{{ zabbix_agent2_ubuntu_suffix }}
+zabbix_agent2_rhel_repo_path: "rhel/{{ zabbix_agent2_rhel_version }}/x86_64"
+zabbix_agent2_rhel_repo_file: "zabbix-release-latest-{{ zabbix_agent2_branch }}.el{{ zabbix_agent2_rhel_version }}.noarch.rpm"
+zabbix_agent2_rhel_repo_url: >-
+  {{ zabbix_agent2_repo_base }}/{{ zabbix_agent2_rhel_repo_path }}/{{ zabbix_agent2_rhel_repo_file }}

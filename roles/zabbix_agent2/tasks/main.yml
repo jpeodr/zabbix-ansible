@@ -1,0 +1,75 @@
+---
+- name: Validar configuracao obrigatoria
+  ansible.builtin.assert:
+    that:
+      - zabbix_agent2_server | default('') | length > 0
+    fail_msg: >-
+      Configure zabbix_agent2_server em group_vars/all.yml
+      com o IP ou DNS do Zabbix Server.
+    success_msg: "Configuracao validada para {{ inventory_hostname }}."
+    quiet: true
+
+- name: Verificar se o sistema operacional e suportado
+  ansible.builtin.assert:
+    that:
+      - ansible_os_family in ['Debian', 'RedHat']
+    fail_msg: >-
+      Sistema nao suportado: {{ ansible_distribution }} {{ ansible_distribution_version }}.
+      Este role suporta Debian/Ubuntu e RHEL/CentOS/Rocky/Alma/Oracle Linux.
+    quiet: true
+
+- name: Instalar repositorio e pacote (Debian/Ubuntu)
+  ansible.builtin.include_tasks: debian.yml
+  when: ansible_os_family == 'Debian'
+
+- name: Instalar repositorio e pacote (RHEL e derivados)
+  ansible.builtin.include_tasks: redhat.yml
+  when: ansible_os_family == 'RedHat'
+
+- name: Configurar os parametros principais do agent
+  ansible.builtin.lineinfile:
+    path: "{{ zabbix_agent2_config_file }}"
+    regexp: "{{ item.regexp }}"
+    line: "{{ item.line }}"
+    state: present
+    backup: true
+  loop:
+    - regexp: '^\s*#?\s*Server='
+      line: "Server={{ zabbix_agent2_server }}"
+    - regexp: '^\s*#?\s*ServerActive='
+      line: "ServerActive={{ zabbix_agent2_serveractive }}"
+    - regexp: '^\s*#?\s*Hostname='
+      line: "Hostname={{ zabbix_agent2_hostname }}"
+    - regexp: '^\s*#?\s*ListenPort='
+      line: "ListenPort={{ zabbix_agent2_listenport }}"
+  notify: Reiniciar Zabbix Agent 2
+
+- name: Configurar HostMetadata (quando informado)
+  ansible.builtin.lineinfile:
+    path: "{{ zabbix_agent2_config_file }}"
+    regexp: '^\s*#?\s*HostMetadata='
+    line: "HostMetadata={{ zabbix_agent2_hostmetadata }}"
+    insertafter: '^\s*Hostname='
+    state: present
+    backup: true
+  when: zabbix_agent2_hostmetadata | default('') | length > 0
+  notify: Reiniciar Zabbix Agent 2
+
+- name: Remover HostMetadata (quando vazio)
+  ansible.builtin.lineinfile:
+    path: "{{ zabbix_agent2_config_file }}"
+    regexp: '^\s*#?\s*HostMetadata='
+    state: absent
+    backup: true
+  when: zabbix_agent2_hostmetadata | default('') | length == 0
+  notify: Reiniciar Zabbix Agent 2
+
+- name: Abrir porta no firewall (opcional)
+  ansible.builtin.include_tasks: firewall.yml
+  when: zabbix_agent2_manage_firewall | bool
+
+- name: Garantir servico habilitado e rodando
+  ansible.builtin.service:
+    name: "{{ zabbix_agent2_service_name }}"
+    state: started
+    enabled: true

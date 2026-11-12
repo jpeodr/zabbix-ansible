@@ -1,0 +1,35 @@
+---
+- name: Definir URL do repositorio Zabbix
+  ansible.builtin.set_fact:
+    zabbix_agent2_repo_url: >-
+      {{ zabbix_agent2_ubuntu_repo_url if ansible_distribution == 'Ubuntu'
+         else zabbix_agent2_debian_repo_url }}
+
+- name: Instalar dependencias do repositorio
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - curl
+      - gnupg
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
+
+- name: Baixar pacote de repositorio Zabbix
+  ansible.builtin.get_url:
+    url: "{{ zabbix_agent2_repo_url }}"
+    dest: "/tmp/zabbix-release-{{ zabbix_agent2_branch }}.deb"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Instalar repositorio Zabbix
+  ansible.builtin.apt:
+    deb: "/tmp/zabbix-release-{{ zabbix_agent2_branch }}.deb"
+    state: present
+
+- name: Instalar Zabbix Agent 2
+  ansible.builtin.apt:
+    name: "{{ ['zabbix-agent2'] + zabbix_agent2_extra_packages }}"
+    state: "{{ zabbix_agent2_package_state }}"
+    update_cache: true

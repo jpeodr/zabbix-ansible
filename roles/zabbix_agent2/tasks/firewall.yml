@@ -1,0 +1,38 @@
+---
+- name: Coletar servicos para detectar firewall
+  ansible.builtin.service_facts:
+
+- name: Abrir porta no firewalld
+  ansible.builtin.command:
+    cmd: "firewall-cmd --permanent --add-port={{ zabbix_agent2_listenport }}/tcp"
+  register: zabbix_agent2_firewalld_add
+  changed_when: >-
+    'ALREADY_ENABLED' not in
+    ((zabbix_agent2_firewalld_add.stderr | default('')) ~ (zabbix_agent2_firewalld_add.stdout | default('')))
+  when:
+    - "'firewalld.service' in ansible_facts.services"
+    - ansible_facts.services['firewalld.service'].state == 'running'
+
+- name: Recarregar firewalld
+  ansible.builtin.command:
+    cmd: firewall-cmd --reload
+  when:
+    - zabbix_agent2_firewalld_add is defined
+    - zabbix_agent2_firewalld_add is changed
+
+- name: Verificar status do ufw
+  ansible.builtin.command:
+    cmd: ufw status
+  register: zabbix_agent2_ufw_status
+  changed_when: false
+  failed_when: false
+  when: ansible_os_family == 'Debian'
+
+- name: Abrir porta no ufw
+  ansible.builtin.command:
+    cmd: "ufw allow {{ zabbix_agent2_listenport }}/tcp"
+  register: zabbix_agent2_ufw_add
+  changed_when: "'Skipping' not in (zabbix_agent2_ufw_add.stdout | default(''))"
+  when:
+    - ansible_os_family == 'Debian'
+    - "'Status: active' in (zabbix_agent2_ufw_status.stdout | default(''))"

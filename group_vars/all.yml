@@ -1,0 +1,39 @@
+---
+# =====================================================================
+# CONFIGURACAO DO ZABBIX AGENT 2
+# =====================================================================
+
+# IP ou DNS do Zabbix Server (ou proxy). OBRIGATORIO.
+# Aceita lista separada por virgula e faixas CIDR.
+zabbix_agent2_server: ""
+
+# Endereco usado para checks ativos. Normalmente o mesmo do server.
+# Se os hosts passarem por um proxy, coloque o IP do proxy.
+zabbix_agent2_serveractive: "{{ zabbix_agent2_server }}"
+
+# Serie do Zabbix. Use a mesma do seu Zabbix Server.
+# Exemplos: 6.0, 7.0, 7.4, 8.0
+zabbix_agent2_branch: "7.0"
+
+# Porta de escuta do agent (checks passivos).
+zabbix_agent2_listenport: 10050
+
+# Nome do host no Zabbix. Por padrao usa o nome do inventario.
+# Descomente apenas se precisar usar outro nome.
+# zabbix_agent2_hostname: "NOME-NO-ZABBIX"
+
+# Opcional: metadados para auto-registro no Zabbix.
+# zabbix_agent2_hostmetadata: "Linux"
+
+# Abrir a porta 10050 no firewall (firewalld/ufw).
+zabbix_agent2_manage_firewall: false
+
+# Estado dos pacotes:
+#   present = instala se faltar (nao atualiza)
+#   latest  = atualiza para a ultima versao da serie
+zabbix_agent2_package_state: present
+
+# Opcional: plugins extras do Agent 2.
+# zabbix_agent2_extra_packages:
+#   - zabbix-agent2-plugin-postgresql
+#   - zabbix-agent2-plugin-mssql

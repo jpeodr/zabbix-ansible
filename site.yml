@@ -1,0 +1,17 @@
+---
+# Instala e configura o Zabbix Agent 2 em todos os servidores da lista.
+#
+# Rodar tudo:
+#   ansible-playbook site.yml
+#
+# Um servidor especifico:
+#   ansible-playbook site.yml --limit srv01
+#
+# Simular sem alterar:
+#   ansible-playbook site.yml --check
+
+- name: Zabbix Agent 2
+  hosts: servers
+  become: true
+  roles:
+    - zabbix_agent2

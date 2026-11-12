@@ -1,0 +1,28 @@
+---
+galaxy_info:
+  author: Equipe de Infraestrutura
+  description: Instala e configura o Zabbix Agent 2 em servidores Linux
+  license: MIT
+  min_ansible_version: "2.15"
+  platforms:
+    - name: Debian
+      versions:
+        - bullseye
+        - bookworm
+        - trixie
+    - name: Ubuntu
+      versions:
+        - focal
+        - jammy
+        - noble
+    - name: EL
+      versions:
+        - "7"
+        - "8"
+        - "9"
+        - "10"
+  galaxy_tags:
+    - zabbix
+    - monitoring
+    - linux
+dependencies: []

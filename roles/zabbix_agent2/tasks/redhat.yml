@@ -1,0 +1,37 @@
+---
+- name: Definir versao compativel do RHEL
+  ansible.builtin.set_fact:
+    zabbix_agent2_rhel_version: >-
+      {{ zabbix_agent2_rhel_map[ansible_distribution ~ '_' ~ ansible_distribution_major_version]
+         | default(ansible_distribution_major_version) }}
+  vars:
+    zabbix_agent2_rhel_map:
+      Amazon_2023: "9"
+      Amazon_2: "7"
+
+- name: Validar versao do RHEL
+  ansible.builtin.assert:
+    that:
+      - zabbix_agent2_rhel_version in ['7', '8', '9', '10']
+    fail_msg: >-
+      Versao nao suportada: {{ ansible_distribution }} {{ ansible_distribution_major_version }}.
+    quiet: true
+
+- name: Instalar repositorio Zabbix (dnf)
+  ansible.builtin.dnf:
+    name: "{{ zabbix_agent2_rhel_repo_url }}"
+    state: present
+    disable_gpg_check: true
+  when: ansible_pkg_mgr in ['dnf', 'dnf5']
+
+- name: Instalar repositorio Zabbix (yum)
+  ansible.builtin.yum:
+    name: "{{ zabbix_agent2_rhel_repo_url }}"
+    state: present
+    disable_gpg_check: true
+  when: ansible_pkg_mgr == 'yum'
+
+- name: Instalar Zabbix Agent 2
+  ansible.builtin.package:
+    name: "{{ ['zabbix-agent2'] + zabbix_agent2_extra_packages }}"
+    state: "{{ zabbix_agent2_package_state }}"
